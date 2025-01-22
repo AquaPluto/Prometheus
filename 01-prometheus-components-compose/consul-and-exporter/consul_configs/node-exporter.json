@@ -1,0 +1,25 @@
+{
+  "services": [
+    {
+      "id": "node_exporter-prometheus",
+      "name": "prometheus-server",
+      "address": "10.0.0.200",
+      "port": 9100,
+      "tags": ["nodes"],
+      "checks": [{
+        "http": "http://10.0.0.200:9100/metrics",
+        "interval": "5s"
+      }]
+    },
+    {
+      "id": "node_exporter-consul",
+      "name": "consul-server",
+      "address": "10.0.0.204",
+      "port": 9100,
+      "tags": ["nodes"],
+      "checks": [{
+        "http": "http://10.0.0.204:9100/metrics",
+        "interval": "5s"
+      }]
+    }]
+}
