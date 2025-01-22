@@ -1,0 +1,54 @@
+global:
+    # 当告警的状态由firing变为resolve时，需等待5min，如果报警未更新，则认为该告警已解决。
+    resolve_timeout: 1m
+    smtp_smarthost: 'smtp.qq.com:465'
+    smtp_from: '298155013@qq.com'
+    smtp_auth_username: '298155013@qq.com'
+    smtp_auth_password: 'liodvniebsbtbgii'
+    smtp_hello: '@qq.com'
+    smtp_require_tls: false
+
+route:
+    # 分组时使用的标签，默认情况下，所有的告警都组织在一起，而一旦指定分组标签，则Alertmanager将按这些标签进行分组
+    group_by: ['job', 'alertname']
+
+    # 发出一组告警通知的初始等待时长；允许等待一个抑制告警到达或收集属于同一组的更多初始告警，通常是0到数分钟；
+    group_wait: 10s
+
+    # 发送关于新告警的消息之前，需要等待多久；新告警将被添加到已经发送了初始通知的告警组中；一般在5分钟或以上；
+    group_interval: 10s
+
+    # 成功发送了告警后再次发送告警信息需要等待的时长，一般至少为3个小时；
+    repeat_interval: 5m
+
+    # 接收者，与receivers.name对应
+    receiver: team-devops-dingtalk
+    #receiver: team-devops-email
+
+templates:
+  - '/etc/alertmanager/email_template.tmpl'
+
+ # 定义接收者
+receivers:
+- name: 'team-devops-email'
+  email_configs:
+    - to: 'mage@magedu.com'
+      headers:
+        subject: "{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}"
+      html: '{{ template "email.default.html" . }}'
+      send_resolved: true 
+
+- name: 'team-devops-dingtalk'
+  webhook_configs:
+  - url: http://prometheus-webhook-dingtalk:8060/dingtalk/webhook1/send             
+    send_resolved: true
+
+inhibit_rules:
+    # 根据label匹配源告警，即触发抑制的告警
+  - source_match:
+      severity: 'critical'
+    # 根据label匹配目的告警，即可能被抑制的告警
+    target_match:
+      severity: 'warning'
+    # 表示这个列表中的标签的值必须在源告警和目标告警之间相等，才能应用抑制规则
+    equal: ['alertname', 'job']
