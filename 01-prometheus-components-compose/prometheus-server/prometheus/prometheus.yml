@@ -1,0 +1,39 @@
+global:
+  scrape_interval:     15s # 抓取数据间隔为每 15 秒一次。默认值为每 1 分钟一次。
+  evaluation_interval: 15s # 记录规则和报警规则拉取间隔为每 15 秒一次。默认值为每 1 分钟一次。
+  # scrape_timeout 单次数据拉取超时时间，全局默认值为10s。当报context deadline exceeded错误时需要在特定的job下配置该字段
+
+# Alertmanager 配置，指定prometheus将报警信息推送到指定的alertmanager实例地址
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      # - alertmanager:9093
+
+# 规则文件，比如指定了报警规则所在的位置，prometheus可以根据这个配置加载规则，用于生成新的时间序列数据或者报警信息
+# 只加载规则一次，然后根据全局 'evaluation_interval' 定期拉取它们。
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# 一个要抓取的端点的抓取配置，用于控制 prometheus 监控哪些资源，下例是Prometheus自身
+scrape_configs:
+  # job名称会增加到拉取到的所有采样点上，同时还有一个instance目标服务的host:port标签也会增加到采样点上
+  - job_name: 'prometheus'
+
+    # 采集指标数据的url，也就是Prometheus需要从http://localhost:9090/metrics中去采集指标数据
+    # metrics_path defaults to '/metrics'
+
+    # 请求方法，如果要加密改成https
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets:
+      - localhost:9090
+
+  # All nodes
+  - job_name: 'nodes'
+    file_sd_configs:
+    - files:                                               
+      - targets/nodes-*.yaml  
+      refresh_interval: 2m 
