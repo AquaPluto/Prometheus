@@ -2,12 +2,11 @@ groups:
 - name: mysqld_rules
   rules:
 
-  # Record slave lag seconds for pre-computed timeseries that takes
-  # `mysql_slave_status_sql_delay` into account
+  # 计算MySQL主从复制延迟时间
   - record: instance:mysql_slave_lag_seconds
     expr: mysql_slave_status_seconds_behind_master - mysql_slave_status_sql_delay
 
-  # Record slave lag via heartbeat method
+  # 通过心跳（heartbeat）的方法来测量主从服务器之间的时间差，即MySQL主从复制延迟
   - record: instance:mysql_heartbeat_lag_seconds
     expr: mysql_heartbeat_now_timestamp_seconds - mysql_heartbeat_stored_timestamp_seconds
 
